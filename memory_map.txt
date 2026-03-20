@@ -1,0 +1,19 @@
+--Caracteristicas Generales--
+Sistema operativo para x86 en modo real para floppy disk
+Sistema de archivos usado: FAT12
+Mono tarea
+No tiene gestor de usuarios
+Solo reconoce el disco en donde esta instalado
+
+--Proceso de arranque--
+BIOS -> BootStageI -> BootStageII -> Kernel
+
+--Mapa de memoria--
+0x07C00 - 0x07DFF - BootStageI
+0x07E00 - 0x08FFF - FAT1
+0x09FFF - 0x0ABFF - Directorio Root
+0x0AC00				Se carga el BootStageII
+0x10000				Se carga el kernel
+0x20000 - 0x2FFFF   Programa del usuarios
+0x30000 - 0x3FFFF   Memoria extra para los programas de usuario
+0x40000 - 0x4FFFF	Espacio utilizado para archivos temporales

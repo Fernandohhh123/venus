@@ -1,0 +1,3 @@
+sudo mount venus.img /mnt/venus
+sudo cp bin/kernel.bin /mnt/venus
+sudo umount /mnt/venus

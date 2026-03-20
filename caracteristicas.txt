@@ -1,0 +1,51 @@
+**************************************
+caracteristicas del sistema operativo
+**************************************
+
+Este Sistema Operativo es desarrollado como pasatiempo, no se busca nada serio ni algo de gran utilidad,
+    solo uso recreativo, pedagogico y experimental.
+    Vease mas como un "Jguete", laboratorio de pruebas, SO de bolsillo o un simple pasatiempo.
+
+- Sistema operativo para x86 en modo real (16 bits)
+
+- modo tty por vga
+
+- sistema de archivos fat 12
+
+- monotarea
+
+- no tiene gestor usuarios
+
+- el usuario tiene al maximo nivel de prioridad
+
+
+- El sistema operativo solo podra reconocer el disco donde este instalado
+
+- crear nodos (carpetas) y navegar entre ellos.
+- poder crear elementos (archivos)
+- editor de texto minimo (pra gusrdar datos, en este caso solo texto, en los
+    elementos de un nodo (en archivos de una carpeta)).
+
+- comandos pensados:
+    - los comandos seran basados en unix
+
+    * ls - listar elementos de un nodo (archivos de una carpeta).
+    * mkdir / mknd - crear un nodo nuevo
+    * touch - crear un elemento vacio
+    * rm - borrar un elemento
+    * rmdir / rmnd - eliminar un nodo
+    * cd / cn - navegar entre nodos
+    * ./ - para ejecutar un binario
+    * clear - limpiar la consola
+    * system - servicios del sistema
+        * -help - ayuda general, comandos y donde encontrar documentacion / maual
+        * -info - proporciona informacion acerca del software del sistema
+        * -hinfo (hardware info) - proporciona informacion del hardware (cpu, ram y disco)
+
+- posible estructura de carpetas
+
+    UNIDAD DE ALMACENAMIENTO/ - nodo raiz
+        home/ - nodo para el usuario
+        exec/bin/ - nodo para elementos binarios ejecutables
+        config/ - nodo para elementos de configuracion
+        system/ - nodo exclusivo para elementos del sistema operativo
