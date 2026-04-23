@@ -8,7 +8,7 @@ mov ax, 0x0000
 mov ss, ax
 sti
 
-mov sp, 0x9FFF
+mov sp, 0x7FFF
 
 mov ah, 0x00
 mov al, 0x03
@@ -20,11 +20,27 @@ call .print_str
 mov ax, 0x0900
 mov es, ax
 mov di, 0x0000
+
 call .findFile
+call .fileFound
+
+mov si, msgKernelLoaded
+call .print_str
+
+
+cli
+mov ax, 0x1000
+mov ds, ax
+mov ax, 0x0000
+mov ss, ax
+mov sp, 0x9FFF
+sti
+
+jmp 0x1000:0000 ;0x10000
 
 jmp $
 
-;-----------
+;-----------------------
 
 .findFile:
 	mov cx, 11
@@ -41,7 +57,8 @@ jmp $
 		loop .loopName
 
 		pop di
-		jmp .fileFound
+		ret
+		; jmp .fileFound ;<<<<<<<<<<<<<<<<<<
 		.notMatch:
 		pop di
 		add di, 32
@@ -133,15 +150,7 @@ jmp $
 
 		jmp .load_clusters
 		.done_ld_clusters:
-
-		cli
-		mov ax, 0x1000
-		mov ds, ax
-		mov ax, 0x0000
-		mov ss, ax
-		mov sp, 0x9FFF
-		sti
-		jmp 0x1000:0x0000 ;saltamos al kernel
+		ret
 
 ret
 
@@ -233,6 +242,7 @@ ret
 msgSrhKernel db "Search KERNEL.BIN...", 0xa, 0xd, 0
 msgKernelNF db "Kernel not found", 0xa, 0xd, 0
 msgDiskReadError db "Error To Read Disk", 0xa, 0xd, 0
+msgKernelLoaded db "Kernel loaded" , 0x0A, 0x0D, 0x00
 
 SectorsPerCluster db 1
 SectorsPerFat dw 9
@@ -250,9 +260,3 @@ pista db 0
 cabeza db 0
 
 kernel_name db "KERNEL  BIN"
-
-;debug
-mov ax, 0xB800
-mov ax, es
-mov byte [ES:0], "Z"
-mov byte [ES:0], 0x02

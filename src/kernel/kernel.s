@@ -1,11 +1,11 @@
 bits 16
 org 0
 
-
-
 cli
 mov ax, 0x1000
 mov ds, ax
+mov ax, 0x1000
+mov es, ax
 mov ax, 0x1000
 mov ss, ax
 mov sp, 0xFFFF
@@ -18,29 +18,60 @@ OS_name db "venus", 0
 OS_version db "0.1", 0
 prompt db "> ", 0
 
-
-
-
 start:
+	cli
+
 	call .init_video
 
-	mov si, OS_name
-	call .print_str
+	mov bl, 00000111b
+	call .set_text_atributes
 
-	mov al, "E"
+	mov bl, "H"
 	call .putchar
 
-;--
+	mov bl, "o"
+	call .putchar
 
+	mov bl, "l"
+	call .putchar
 
-;-------------------------
-.main_loop:
+	mov bl, "a"
+	call .putchar
+
+	mov bl, 00010111b
+	call .set_text_atributes
+
+	mov bx, msgEnterMainLoop
+	call .print_str
 
 	jmp .main_loop
 
+;-------------------------
+;-------------------------
+
+.main_loop:
+
+	;sti
+
+	; x , y
+	; bh, bl
+	mov bh, 0x00
+	mov bl, 0x03
+	call .gotoxy
+
+	mov bl, "z"
+	call .putchar
+
+	hlt
+
+	jmp .main_loop
+
+.syscall_dispatcher:
+
+ret
+
 %include "src/kernel/video.s"
 %include "src/kernel/ivt.s"
-
 
 msgEnterMainLoop db "Enter to main loop", 0
 

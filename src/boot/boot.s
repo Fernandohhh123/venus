@@ -104,7 +104,10 @@ start:
 	call .fileFound
 
 	jmp 0x0000:0xAC00 ;vamos al stgeII
+
 ;----End start------
+
+
 
 .findFile:
 	mov cx, 11
