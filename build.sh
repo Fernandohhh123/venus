@@ -1,3 +1,6 @@
+echo "creando carpetas"
+mkdir -p bin
+
 echo "Ensamblando"
 #nasm -f bin src/boot/bootFirstStage.s -o bin/bootFirstStage.bin
 #nasm -f bin src/boot/bootPtOne.s -o bin/bootSecondStage.bin

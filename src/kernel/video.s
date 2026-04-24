@@ -2,6 +2,7 @@
 	push es
 	push di
 	push ax
+	push bx
 
     mov al, 80
     mov byte [screen_char_len_x], al
@@ -14,18 +15,68 @@
 
 	mov word [cursor_offset_memory], 0x0000
 
+	; limpiamos la pantalla
+	call .clean_screen
+
 	mov bx, 0x0000
 	call .gotoxy
 
+	pop bx
 	pop ax
 	pop di
 	pop es
 
     ret
 
-.set_text_atributes:
+; ax = no se xd
+; bl color
+.set_text_color:
     mov byte [text_color], bl
-    ret
+ret
+
+
+;ax = ?
+.clean_screen:
+	push es
+	push di
+	push ax
+	push bx
+	push cx
+
+	xor ax, ax
+	xor bx, bx
+	mov al, byte [screen_char_len_x]
+	mov bl, byte [screen_char_len_y]
+	mul bx
+	mov bx, 2
+	mul bx
+
+	mov bl, byte [text_color]
+
+	mov di, 0xb800
+	mov es, di
+	xor di, di
+
+	.loop_clean_vram:
+	mov byte [es:di], 0x20 ;caracter espacio
+	inc di
+	mov byte [es:di], bl
+	inc di
+	cmp di, ax
+	jge .done_clean_vram
+	jmp .loop_clean_vram
+	.done_clean_vram:
+
+	mov bx, 0x0000
+	call .gotoxy
+
+	pop cx
+	pop bx
+	pop ax
+	pop di
+	pop es
+ret
+
 
 ; ax ?
 ; bx = puntero al string, debe terminar con 0
@@ -67,10 +118,32 @@ ret
 
 	mov di, word [cursor_offset_memory]
 
-	; verificamos si es un caracter especial --
+	;## verificamos si es un caracter especial ----
+	cmp bl, 0x20
+	jg .print_n_char
+	je .print_n_char
+	cmp bl, 0x0A ;endl
+	je .print_endl
+	cmp bl, 0x0D ;retorno de carro
+	je .print_ret_carro
 
-	; si no lo es, lo imprimimos --
+	.print_endl:
+	mov bl, byte [cursor_y]
+	inc bl
+	mov bh, byte [cursor_x]
+	call .gotoxy
+	jmp .done_putchar
 
+	.print_ret_carro:
+	xor bh, bh
+	mov bl, [cursor_y]
+	call .gotoxy
+	jmp .done_putchar
+
+	;## si no lo es, lo imprimimos -------------
+
+
+	.print_n_char: ; imprimimos un char normal
 	mov byte [es:di], bl
 	inc di
 	mov byte [es:di], bh
@@ -91,11 +164,12 @@ ret
 
 	jmp .done_update_cursor
 	.print_new_line:
-	mov bh, 0
+	xor bh, bh
 	mov bl, byte [cursor_y]
 	inc bl
 	call .gotoxy
 	.done_update_cursor:
+	.done_putchar:
 
 	pop di
 	pop es

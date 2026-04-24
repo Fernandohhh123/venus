@@ -17,7 +17,6 @@ jmp start
 OS_name db "venus", 0
 OS_version db "0.1", 0
 prompt db "> ", 0
-char_endl db 0x0A, 0x0D, 0
 
 start:
 	cli
@@ -27,21 +26,15 @@ start:
 	mov bl, 00000111b
 	call .set_text_color
 
-	;mov bl, 00000010b
+	mov bl, 00000010b
 	call .set_text_color
+
 	mov bx, msgEnterMainLoop
 	call .print_str
 
 	mov bl, 01010000b ;magenta
 	call .set_text_color
 	mov bx, OS_name
-	call .print_str
-	mov bl, " "
-	call .putchar
-	mov bx, OS_version
-	call .print_str
-
-	mov bx, char_endl
 	call .print_str
 
 	jmp .main_loop
@@ -57,10 +50,9 @@ start:
 	; x , y
 	; bh, bl
 
-	mov bl, 00000111b
-	call .set_text_color
-	mov bx, prompt
-	call .print_str
+	mov bl, 00000000b
+	mov bl, prompt
+	call .putchar
 
 	hlt
 
