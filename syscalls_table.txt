@@ -1,6 +1,23 @@
 se usa "int 0x80" para llamar al sistema
 
-### llamada para imprimir en pantalla ###
- -Esta funcion escribre caracteres ascii hasta encontrar un 0x00
-ax = 0x01
-bx = puntero a la cadena a imprimir (se tomara el segmento actual)
+### Llamadas para stdout ###
+
+ - imprime un caracter ascii
+al =
+bl = [ascii del caracter]
+
+ - Esta funcion escribre caracteres ascii hasta encontrar un 0x00
+al = 
+bx = [puntero a la cadena a imprimir] (se tomara el segmento actual)
+
+ - Funcion para cmbiar el color del texto en vga
+al =
+bl = [vga color]
+
+ - Mueve el cursor a una posicion deseada, funcion gotoxy
+al =
+bh = [X]
+bl = [Y]
+
+ - limpia la consola
+al =

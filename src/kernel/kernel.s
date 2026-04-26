@@ -6,21 +6,19 @@ mov ax, 0x1000
 mov ds, ax
 mov ax, 0x1000
 mov es, ax
-mov ax, 0x1000
+mov ax, 0x3000
 mov ss, ax
 mov sp, 0xFFFF
 sti
 
 jmp start
 
-;system info
-OS_name db "venus", 0
-OS_version db "0.1", 0
-prompt db "> ", 0
-char_endl db 0x0A, 0x0D, 0
+%include "src/kernel/data.s"
 
 start:
 	cli
+
+	call .set_ivt
 
 	call .init_video
 
@@ -30,7 +28,7 @@ start:
 	;mov bl, 00000010b
 	call .set_text_color
 	mov bx, msgEnterMainLoop
-	call .print_str
+	;call .print_str
 
 	mov bl, 01010000b ;magenta
 	call .set_text_color
@@ -41,9 +39,21 @@ start:
 	mov bx, OS_version
 	call .print_str
 
-	mov bx, char_endl
+
+	mov bl, 00000000b
+	call .set_text_color
+	mov bl, " "
+	call .putchar
+
+	mov bl, 01000000b
+	call .set_text_color
+	mov bx, msg_etapa_desarrollo
 	call .print_str
 
+	mov bl, 00000111b
+	call .set_text_color
+
+	sti ;<<<<<<
 	jmp .main_loop
 
 ;-------------------------
@@ -51,18 +61,12 @@ start:
 
 .main_loop:
 
-	;sti
-
-	; call .clean_screen
-	; x , y
-	; bh, bl
-
-	mov bl, 00000111b
-	call .set_text_color
-	mov bx, prompt
-	call .print_str
-
 	hlt
+	;esperar interrupcion
+	;leer teclado
+	;procesar tecla presionada
+	;ejecutar instruccion
+	;loop
 
 	jmp .main_loop
 
@@ -70,9 +74,6 @@ start:
 
 ret
 
+%include "src/kernel/stdio.s"
 %include "src/kernel/video.s"
 %include "src/kernel/ivt.s"
-
-msgEnterMainLoop db "Enter to main loop", 0x0A, 0x0D, 0
-
-msgEndl db 0xa, 0xd, 0
