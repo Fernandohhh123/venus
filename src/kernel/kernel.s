@@ -99,3 +99,5 @@ ret
 %include "src/kernel/stdio.s"
 %include "src/kernel/video.s"
 %include "src/kernel/ivt.s"
+%include "src/kernel/drivers/vga_driver.s"
+%include "src/kernel/drivers/keyboard_driver.s"

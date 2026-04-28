@@ -74,6 +74,11 @@ ret
 	pop es
 ret
 
+
+
+; ESTA FUNCION REQUIERE UNA REFORMULACION
+;  PROCESA CARACTERES ESPECIALES Y NO DEBE
+;  SOLO DEBE COLOCAR EL CODIGO ASCII EN LA MEMORIA
 ; Funcion para poner un caracter en la posicion actual del cursor
 ; ax = 0x01
 ; bl = ascii
@@ -161,28 +166,10 @@ ret
 	add ax, bx
 	mov word [cursor_offset_screen], ax
 
+
 	; E:F = cursor_offset
 	mov bx, word [cursor_offset_screen]
-
-	; accedemos a la parte alta del registro de posicion
-	;  E
-	mov dx, 0x03D4
-	mov al, 0x0E
-	out dx, al
-
-	mov dx, 0x03D5
-	mov al, bh
-	out dx, al
-
-	; parte baja del registro de posicion para el cursor
-	;  F
-	mov dx, 0x03D4
-	mov al, 0x0F
-	out dx, al
-
-	mov dx, 0x03D5
-	mov al, bl
-	out dx, al
+	call .vga_gotoxy
 
 	;actualizamos el puntero de la memoria
 	mov ax, word [cursor_offset_screen]
@@ -281,44 +268,9 @@ ret
 
 ;################################################
 
-;------------------------------------------------
-; FLUJO DE DATOS DE ENTRADA POR EL TECLADO
-;------------------------------------------------
-
-; funcion para procesar el teclado
-; devuelve el scancode en el registro dl
-.keyboard_handler:
-	push ax
-	push bx
-
-	in al, 0x60 ;leemos scancode
-
-	test al, 0x80
-	jnz .fin_kb_handler ;por si no se presiono una tecla
-
-	;si se preciono una tecla
-	xor bx, bx
-	mov bl, byte [kb_buffer_head]
-	mov byte [kb_buffer + bx], al
-	inc bl
-	and bl, 0x0F ;forzamos 0 en bh
-	mov byte [kb_buffer_head], bl
-
-	;----debug----
-	;mov bl, al
-	;add bl, '0'
-	;call .putchar
-	;-------------
-
-
-	.fin_kb_handler:
-	mov al, 0x20 ;00100000b
-	out 0x20, al
-
-	pop bx
-	pop ax
-iret
-
+;-----------------------------
+;ENTRADA DE DATOS POR TECLADO
+;-----------------------------
 
 ; funcion getchar
 ;funcion para obtener el codigo ascii de
