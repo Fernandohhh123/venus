@@ -1,6 +1,7 @@
 
 ;------------------------------------------------
 ;seccion para manejar flujo de salida de datos
+;
 ;------------------------------------------------
 
 ; Funcion para limpiar la consola
@@ -74,7 +75,7 @@ ret
 ret
 
 ; Funcion para poner un caracter en la posicion actual del cursor
-; ax = ?
+; ax = 0x01
 ; bl = ascii
 .putchar:
 	push ax
@@ -82,11 +83,12 @@ ret
 	push es
 	push di
 
+	; colocamos el color del texto
 	mov bh, byte [text_color]
 
+	;nos colocamos en la memoria de video
 	mov di, 0xb800
 	mov es, di
-
 	mov di, word [cursor_offset_memory]
 
 	;## verificamos si es un caracter especial ----
@@ -98,7 +100,6 @@ ret
 
 	;## si no lo es, lo imprimimos -------------
 
-
 	.print_n_char: ; imprimimos un char normal
 	mov byte [es:di], bl
 	inc di
@@ -106,22 +107,24 @@ ret
 	inc di
 	mov word [cursor_offset_memory], di
 
+	;-----
 	; actualizamos la posicion del cursor
 	mov al, byte [cursor_x]
 	mov ah, byte [screen_char_len_x]
 
+	; verificamos si esta en el final de la pantalla
 	cmp al, ah
-	jg .print_new_line
+	je .print_new_line
 
 	mov bh, byte [cursor_x]
 	inc bh
 	mov bl, byte [cursor_y]
 	call .gotoxy
-
 	jmp .done_update_cursor
+
 	.print_new_line:
-	xor bh, bh
-	mov bl, byte [cursor_y]
+	xor bh, bh ; x = 0
+	mov bl, byte [cursor_y] ; y += 1
 	inc bl
 	call .gotoxy
 	.done_update_cursor:
@@ -199,6 +202,8 @@ ret
 	push ax
 	push bx
 
+	cmp bl, 0x08 ;retoceso
+	je .print_backspace
 	cmp bl, 0x0A ;endl
 	je .print_endl
 	cmp bl, 0x0D ;retorno de carro
@@ -215,6 +220,47 @@ ret
 	xor bh, bh
 	mov bl, [cursor_y]
 	call .gotoxy
+	jmp .done_special_char
+
+	.print_backspace:
+	xor bx, bx
+	mov bh, byte [cursor_x]
+	mov bl, byte [cursor_y]
+	mov al, bl
+
+	;verificamos que el cursor este en 0, 0
+	or al, bh
+	jz .done_special_char
+
+	;verificamos que el cursor este al principio
+	cmp bh, 0
+	je .ret_car_y
+
+	dec bh
+	call .gotoxy
+	mov bl, " "
+	call .putchar
+	mov bh, byte [cursor_x]
+	mov bl, byte [cursor_y]
+	dec bh
+	call .gotoxy
+
+	jmp .done_special_char
+	;si el cursor esta en 0,y regresamos en 1y
+	.ret_car_y:
+	mov bl, byte [cursor_y]
+	dec bl
+	mov bh, byte [screen_char_len_x]
+	call .gotoxy
+	mov bl, " "
+	call .putchar
+	mov bl, byte [cursor_y]
+	dec bl
+	mov bh, byte [screen_char_len_x]
+	call .gotoxy
+
+	jmp .done_special_char
+
 
 	.done_special_char:
 
@@ -223,12 +269,24 @@ ret
 	pop di
 	pop es
 ret
+
+; Funcion para cambiar el color del texto vga
+; ax = no se xd
+; bl color
+.set_text_color:
+    mov byte [text_color], bl
+ret
+
 ;------------------------------------------------
 
+;################################################
 
 ;------------------------------------------------
 ; FLUJO DE DATOS DE ENTRADA POR EL TECLADO
 ;------------------------------------------------
+
+; funcion para procesar el teclado
+; devuelve el scancode en el registro dl
 .keyboard_handler:
 	push ax
 	push bx
@@ -236,16 +294,91 @@ ret
 	in al, 0x60 ;leemos scancode
 
 	test al, 0x80
-	jnz .fin_kb_handler
+	jnz .fin_kb_handler ;por si no se presiono una tecla
 
-	mov bl, al
-	add bl, '0'
-	call .putchar
+	;si se preciono una tecla
+	xor bx, bx
+	mov bl, byte [kb_buffer_head]
+	mov byte [kb_buffer + bx], al
+	inc bl
+	and bl, 0x0F ;forzamos 0 en bh
+	mov byte [kb_buffer_head], bl
+
+	;----debug----
+	;mov bl, al
+	;add bl, '0'
+	;call .putchar
+	;-------------
+
 
 	.fin_kb_handler:
-	mov al, 0x20
+	mov al, 0x20 ;00100000b
 	out 0x20, al
 
 	pop bx
 	pop ax
 iret
+
+
+; funcion getchar
+;funcion para obtener el codigo ascii de
+; una teclapresionada
+; al =
+; Retorna en el registro
+;  dl = codigo ascii de la tecla presionada
+.getchar:
+	push ax
+	push bx
+
+	xor ax, ax
+	xor bx, bx
+	;verificamos que hay algo en el buffer
+	;si no hay nada, esperamos
+	;si hay algo devolvemos el valor del buffer en dl
+	;head++ && 0x0F
+
+	.wait_loop:
+
+	cli
+	mov al, byte [kb_buffer_head]
+	mov bl, byte [kb_buffer_tail]
+	cmp al, bl
+	jne .return_char
+	sti
+
+	hlt
+	jmp .wait_loop
+
+	.return_char:
+	cli
+	mov dl, byte [kb_buffer + bx]
+	inc bl
+	and bl, 0x0F
+	mov byte [kb_buffer_tail], bl
+	sti
+
+	test dl, 0x80
+	jnz .wait_loop
+
+	; dl lo convertimos a ascii
+	mov bl, dl
+	; el codigo ascii se retorna en dl
+	call .scancode_to_ascii
+
+	pop bx
+	pop ax
+ret
+
+;convertimos el scancode a ascii
+; bl = scancode
+; return dl = ascii
+.scancode_to_ascii:
+	push ax
+	push bx
+
+	xor bh, bh
+	mov dl, byte [ascii_table + bx]
+
+	pop bx
+	pop ax
+ret

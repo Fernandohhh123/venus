@@ -3,21 +3,26 @@ se usa "int 0x80" para llamar al sistema
 ### Llamadas para stdout ###
 
  - imprime un caracter ascii
-al =
+al = 0x01
 bl = [ascii del caracter]
 
  - Esta funcion escribre caracteres ascii hasta encontrar un 0x00
-al = 
+al = 0x02
 bx = [puntero a la cadena a imprimir] (se tomara el segmento actual)
 
  - Funcion para cmbiar el color del texto en vga
-al =
+al = 0x03
 bl = [vga color]
 
  - Mueve el cursor a una posicion deseada, funcion gotoxy
-al =
+al = 0x04
 bh = [X]
 bl = [Y]
 
  - limpia la consola
-al =
+al = 0x05
+
+ - getchar
+  - el caracter lo guarda en el registro dl
+al = 0x06
+

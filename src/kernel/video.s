@@ -1,12 +1,17 @@
+;------------------------------------------------
+;Este archivo contiene funciones para
+; manejar el sistema
+;------------------------------------------------
+
 .init_video:
 	push es
 	push di
 	push ax
 	push bx
 
-    mov al, 80
+    mov al, 79
     mov byte [screen_char_len_x], al
-    mov al, 25
+    mov al, 24
     mov byte [screen_char_len_y], al
 
     mov al, 00000111b ;color blanco sobre fondo negro
@@ -27,15 +32,4 @@
 	pop es
 
     ret
-
-; ax = no se xd
-; bl color
-.set_text_color:
-    mov byte [text_color], bl
-ret
-
-
-
-; ########################################
-
 

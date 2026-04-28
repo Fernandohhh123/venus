@@ -5,7 +5,7 @@ jmp short start ;salto a la ejecucion del bootloader
 nop ;instruccion para poder ajustar la tabla bpb, da lo mismo poner un db 0
 
 ;tabla BPB para fat12
-OEMName db "VENUSO.1"
+OEMName db "VENUS   "
 BytesPerSector dw 512
 SectorsPerCluster db 1
 ReservedSectorsCounter dw 1
@@ -57,7 +57,6 @@ file_name db "BOOTSTIIBIN"
 ;kernel_name db "KERNEL  BIN"
 
 start:
-
 	cli
     mov ax, 0x07C0
     mov ds, ax
@@ -67,6 +66,8 @@ start:
     sti
 
     mov sp, 0x7bff
+
+	mov byte [DriveNumber], dl
 
 	;cargamos fat1 en 0x07E00 y termina en 0x08FFF
 	;leemos a partir del sector 1
@@ -131,8 +132,6 @@ start:
 		cmp di, 480
 		jge .file_not_found
 		jmp .findFile
-;
-
 
 .file_not_found:
 	mov si, msgFileNotFound

@@ -39,17 +39,17 @@ start:
 	mov bx, OS_version
 	call .print_str
 
-
 	mov bl, 00000000b
 	call .set_text_color
 	mov bl, " "
 	call .putchar
 
-	mov bl, 01000000b
+	mov bl, 11000111b
 	call .set_text_color
 	mov bx, msg_etapa_desarrollo
 	call .print_str
 
+	; cambiamos el color a blanco
 	mov bl, 00000111b
 	call .set_text_color
 
@@ -61,17 +61,39 @@ start:
 
 .main_loop:
 
-	hlt
-	;esperar interrupcion
-	;leer teclado
-	;procesar tecla presionada
-	;ejecutar instruccion
-	;loop
+	call .getchar
+	mov bl, dl
+	call .putchar
 
 	jmp .main_loop
 
-.syscall_dispatcher:
 
+;------------------------------------------------
+; Aqui se procesan las llamadas al sistema
+;------------------------------------------------
+.syscall_dispatcher:
+	push ax
+	push bx
+	push cx
+	push es
+	push di
+
+	; putchar
+	cmp al, 0x01
+	je .sys_putchar
+
+
+
+	.sys_putchar:
+	call .putchar
+	jmp .done_syscall_dispatcher
+
+	.done_syscall_dispatcher:
+	pop di
+	pop es
+	pop cx
+	pop bx
+	pop ax
 ret
 
 %include "src/kernel/stdio.s"
