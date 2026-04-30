@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "creando carpetas"
 mkdir -p bin
 
@@ -26,6 +28,3 @@ mcopy -i venus.img bin/bootstii.bin ::BOOTSTII.BIN
 #mcopy -i venus.img bin/kernel.bin ::KERNEL.BIN
 #dd if=bin/boot.bin of=venus.img bs=512 seek=0 conv=notrunc
 echo "Listo"
-
-#echo "Corriendo..."
-#qemu-system-i386 -fda bin/boot.bin
