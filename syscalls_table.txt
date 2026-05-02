@@ -3,10 +3,12 @@ se usa "int 0x80" para llamar al sistema
 ### Llamadas para stdout ###
 
  - imprime un caracter ascii
+	- putchar
 al = 0x01
 bl = [ascii del caracter]
 
- - Esta funcion escribre caracteres ascii hasta encontrar un 0x00
+ - Esta funcion escribre una cadena caracteres
+	ascii hasta encontrar un 0x00
 al = 0x02
 bx = [puntero a la cadena a imprimir] (se tomara el segmento actual)
 
@@ -25,4 +27,3 @@ al = 0x05
  - getchar
   - el caracter lo guarda en el registro dl
 al = 0x06
-
