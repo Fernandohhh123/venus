@@ -19,39 +19,7 @@ start:
 	cli
 
 	call .set_ivt
-
 	call .init_video
-
-	mov bl, 00000111b
-	call .set_text_color
-
-	;mov bl, 00000010b
-	call .set_text_color
-	mov bx, msgEnterMainLoop
-	;call .print_str
-
-	mov bl, 01010000b ;magenta
-	call .set_text_color
-	mov bx, OS_name
-	call .print_str
-	mov bl, " "
-	call .putchar
-	mov bx, OS_version
-	call .print_str
-
-	mov bl, 00000000b
-	call .set_text_color
-	mov bl, " "
-	call .putchar
-
-	mov bl, 11000111b
-	call .set_text_color
-	mov bx, msg_etapa_desarrollo
-	call .print_str
-
-	; cambiamos el color a blanco
-	mov bl, 00000111b
-	call .set_text_color
 
 	sti ;<<<<<<
 	jmp .main_loop
@@ -61,9 +29,7 @@ start:
 
 .main_loop:
 
-	call .getchar
-	mov bl, dl
-	call .putchar
+	call .start_terminal
 
 	jmp .main_loop
 
@@ -72,32 +38,57 @@ start:
 ; Aqui se procesan las llamadas al sistema
 ;------------------------------------------------
 .syscall_dispatcher:
-	push ax
 	push bx
 	push cx
+	push dx
+	push si
 	push es
+	push ds
 	push di
 
 	; putchar
-	cmp al, 0x01
+	cmp ah, 0x01
 	je .sys_putchar
+	cmp ah, 0x02
+	je .sys_print_str
+	cmp ah, 0x03
+	je .sys_set_text_color
+	cmp ah, 0x06
+	je .sys_getchar
 
-
+	jmp .done_syscall_dispatcher
 
 	.sys_putchar:
 	call .putchar
 	jmp .done_syscall_dispatcher
 
+	.sys_print_str:
+	call .print_str
+	jmp .done_syscall_dispatcher
+
+	.sys_getchar:
+	call .getchar
+	jmp .done_syscall_dispatcher
+
+	.sys_set_text_color:
+	call .set_text_color
+	jmp .done_syscall_dispatcher
+
 	.done_syscall_dispatcher:
+
+
 	pop di
+	pop ds
 	pop es
+	pop si
+	pop dx
 	pop cx
 	pop bx
-	pop ax
-ret
+iret
 
 %include "src/kernel/stdio.s"
 %include "src/kernel/video.s"
 %include "src/kernel/ivt.s"
 %include "src/kernel/drivers/vga_driver.s"
 %include "src/kernel/drivers/keyboard_driver.s"
+%include "programs/terminal.s"
