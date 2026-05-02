@@ -5,7 +5,7 @@
 ;------------------------------------------------
 
 ; Funcion para limpiar la consola
-;ax = ?
+;ah = ?
 .clear_screen:
 	push es
 	push di
@@ -49,21 +49,24 @@ ret
 
 
 ; Funcion para imprimir cadenas de caracteres
-; ax ?
+; ah = 0x02
 ; bx = puntero al string, debe terminar con 0
 .print_str:
 	push es
 	push di
 	push ax
 
+	mov ax, ds
+	mov es, ax
+
 	mov di, bx
 
 	; es:di
 	.loop_print:
 
-	mov bl, [es:di]
+	mov al, [es:di]
 	inc di
-	or bl, bl
+	or al, al
 	jz .done
 	call .putchar
 	jmp .loop_print
@@ -75,13 +78,9 @@ ret
 ret
 
 
-
-; ESTA FUNCION REQUIERE UNA REFORMULACION
-;  PROCESA CARACTERES ESPECIALES Y NO DEBE
-;  SOLO DEBE COLOCAR EL CODIGO ASCII EN LA MEMORIA
 ; Funcion para poner un caracter en la posicion actual del cursor
-; ax = 0x01
-; bl = ascii
+; ah = 0x01
+; al = ascii
 .putchar:
 	push ax
 	push bx
@@ -96,23 +95,19 @@ ret
 	mov es, di
 	mov di, word [cursor_offset_memory]
 
-	;## verificamos si es un caracter especial ----
-	cmp bl, 0x20
-	jg .print_n_char
-	je .print_n_char ;si es 0x20 es un espacio
+	;comprobamos que es un caracter especial
+	cmp al, 0x20
+	jge .put_normal_char
 	call .process_special_char
 	jmp .done_putchar
 
-	;## si no lo es, lo imprimimos -------------
-
-	.print_n_char: ; imprimimos un char normal
-	mov byte [es:di], bl
+	.put_normal_char:
+	mov byte [es:di], al
 	inc di
 	mov byte [es:di], bh
 	inc di
 	mov word [cursor_offset_memory], di
 
-	;-----
 	; actualizamos la posicion del cursor
 	mov al, byte [cursor_x]
 	mov ah, byte [screen_char_len_x]
@@ -189,11 +184,9 @@ ret
 	push ax
 	push bx
 
-	cmp bl, 0x08 ;retoceso
-	je .print_backspace
-	cmp bl, 0x0A ;endl
+	cmp al, 0x0A ;endl
 	je .print_endl
-	cmp bl, 0x0D ;retorno de carro
+	cmp al, 0x0D ;retorno de carro
 	je .print_ret_carro
 
 	.print_endl:
@@ -209,14 +202,8 @@ ret
 	call .gotoxy
 	jmp .done_special_char
 
-	.print_backspace:
-	xor bx, bx
-	mov bh, byte [cursor_x]
-	mov bl, byte [cursor_y]
-	mov al, bl
-
 	;verificamos que el cursor este en 0, 0
-	or al, bh
+	or bl, bh
 	jz .done_special_char
 
 	;verificamos que el cursor este al principio
@@ -258,10 +245,10 @@ ret
 ret
 
 ; Funcion para cambiar el color del texto vga
-; ax = no se xd
-; bl color
+; ah = 0x03
+; al color
 .set_text_color:
-    mov byte [text_color], bl
+    mov byte [text_color], al
 ret
 
 ;------------------------------------------------
@@ -275,11 +262,10 @@ ret
 ; funcion getchar
 ;funcion para obtener el codigo ascii de
 ; una teclapresionada
-; al =
+; ah = 0x06
 ; Retorna en el registro
-;  dl = codigo ascii de la tecla presionada
+;  al = codigo ascii de la tecla presionada
 .getchar:
-	push ax
 	push bx
 
 	xor ax, ax
@@ -303,34 +289,31 @@ ret
 
 	.return_char:
 	cli
-	mov dl, byte [kb_buffer + bx]
+	mov al, byte [kb_buffer + bx]
 	inc bl
 	and bl, 0x0F
 	mov byte [kb_buffer_tail], bl
 	sti
 
-	test dl, 0x80
+	test al, 0x80
 	jnz .wait_loop
 
-	; dl lo convertimos a ascii
-	mov bl, dl
-	; el codigo ascii se retorna en dl
+	; al lo convertimos a ascii
+	; el codigo ascii se retorna en al
 	call .scancode_to_ascii
 
 	pop bx
-	pop ax
 ret
 
 ;convertimos el scancode a ascii
-; bl = scancode
-; return dl = ascii
+; al = scancode
+; return al = ascii
 .scancode_to_ascii:
-	push ax
 	push bx
 
 	xor bh, bh
-	mov dl, byte [ascii_table + bx]
+	mov bl, al
+	mov al, byte [ascii_table + bx]
 
 	pop bx
-	pop ax
 ret

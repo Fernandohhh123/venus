@@ -7,7 +7,6 @@ char_endl db 0x0A, 0x0D, 0
 msg_etapa_desarrollo db "alpha-experimental", 0x0a, 0xd, 0
 msgEnterMainLoop db "Enter to main loop", 0x0A, 0x0D, 0
 
-prompt db ">", 0
 ;--------------------------------------------------------
 
 ;--------------------------------------------------------
@@ -56,7 +55,7 @@ ascii_table:
 	db 0x08 ; backspace
 	db 'T' ; tab
 	db 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']'
-	db 'E' ; enter
+	db 0x0A ; enter
 	db 'C' ; ctl
 	db 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', "'"
 	db "`"
