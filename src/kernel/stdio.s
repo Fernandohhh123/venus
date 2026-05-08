@@ -184,6 +184,8 @@ ret
 	push ax
 	push bx
 
+	cmp al, 0x08 ;backspace
+	je .print_backspace
 	cmp al, 0x0A ;endl
 	je .print_endl
 	cmp al, 0x0D ;retorno de carro
@@ -202,39 +204,33 @@ ret
 	call .gotoxy
 	jmp .done_special_char
 
+
+	.print_backspace:
 	;verificamos que el cursor este en 0, 0
-	or bl, bh
+	mov bh, byte [cursor_x]
+	mov bl, byte [cursor_y]
+	mov al, bl
+	or al, bh
 	jz .done_special_char
 
-	;verificamos que el cursor este al principio
+	;verificamos que el cursor este al principio x = 0
 	cmp bh, 0
 	je .ret_car_y
 
 	dec bh
 	call .gotoxy
-	mov bl, " "
-	call .putchar
-	mov bh, byte [cursor_x]
-	mov bl, byte [cursor_y]
-	dec bh
-	call .gotoxy
+	mov byte [cursor_x], bh
+	mov byte [cursor_y], bl
 
 	jmp .done_special_char
-	;si el cursor esta en 0,y regresamos en 1y
+	;si el cursorX esta en 0,y regresamos en 1y
 	.ret_car_y:
 	mov bl, byte [cursor_y]
 	dec bl
 	mov bh, byte [screen_char_len_x]
 	call .gotoxy
-	mov bl, " "
-	call .putchar
-	mov bl, byte [cursor_y]
-	dec bl
-	mov bh, byte [screen_char_len_x]
-	call .gotoxy
 
 	jmp .done_special_char
-
 
 	.done_special_char:
 
