@@ -1,7 +1,12 @@
 bits 16
-org 0
 
-jmp short start ;salto a la ejecucion del bootloader
+%ifndef ELF
+org 0
+%endif
+
+global _start
+
+jmp short _start ;salto a la ejecucion del bootloader
 nop ;instruccion para poder ajustar la tabla bpb, da lo mismo poner un db 0
 
 ;tabla BPB para fat12
@@ -56,7 +61,7 @@ LBA dw 0
 file_name db "BOOTSTIIBIN"
 ;kernel_name db "KERNEL  BIN"
 
-start:
+_start:
 	cli
     mov ax, 0x07C0
     mov ds, ax
