@@ -26,10 +26,7 @@ if [ "$1" == "debug" ]; then
 	sudo mkfs.fat -F 12 venus.img
 
 	echo "Grabando boot"
-	#dd if=bin/bootFirstStage.bin of=venus.img bs=512 seek=0 conv=notrunc
 	dd if=bin/boot.bin of=venus.img bs=512 seek=0 conv=notrunc
-
-	#dd if=bin/bootSecondStage.bin of=venus.img bs=512 seek=34 conv=notrunc
 
 	echo "copiando archivos"
 	mcopy -i venus.img bin/kernel.bin ::KERNEL.BIN
@@ -47,34 +44,45 @@ if [ "$1" == "debug" ]; then
 
 	echo "Listo"
 
-############################
+
+	else ##########################################
+
+	echo "creando carpetas"
+	mkdir -p bin
+
+	echo "Ensamblando"
+	nasm -f bin src/kernel/kernel.s -o bin/kernel.bin
+	nasm -f bin src/boot/bootStageTwo.s -o bin/bootstii.bin
+	nasm -f bin src/boot/boot.s -o bin/boot.bin
+
+	if [ -f "venus.img" ]; then
+		echo "La imagen ya existe"
+		# Si la imagen existe, no se vuelve a crear
+		#  solo se copian los binarios
 	else
-###########################
+		# Si la imagen no existe, se crea
+		echo "Creando la imagen"
+		dd if=/dev/zero of=venus.img bs=512 count=2880
 
-echo "creando carpetas"
-mkdir -p bin
+		echo "Formateando la imagen"
+		sudo mkfs.fat -F 12 venus.img
+	fi
 
-echo "Ensamblando"
-nasm -f bin src/kernel/kernel.s -o bin/kernel.bin
-nasm -f bin src/boot/bootStageTwo.s -o bin/bootstii.bin
-nasm -f bin src/boot/boot.s -o bin/boot.bin
+	#echo "Creando la imagen"
+	#dd if=/dev/zero of=venus.img bs=512 count=2880
 
-echo "Creando la imagen"
-dd if=/dev/zero of=venus.img bs=512 count=2880
+	#echo "Formateando la imagen"
+	#sudo mkfs.fat -F 12 venus.img
 
-echo "Formateando la imagen"
-sudo mkfs.fat -F 12 venus.img
+	echo "Grabando boot"
+	dd if=bin/boot.bin of=venus.img bs=512 seek=0 conv=notrunc
 
-echo "Grabando boot"
-#dd if=bin/bootFirstStage.bin of=venus.img bs=512 seek=0 conv=notrunc
-dd if=bin/boot.bin of=venus.img bs=512 seek=0 conv=notrunc
+	echo "copiando archivos"
+	mcopy -i venus.img bin/kernel.bin ::KERNEL.BIN
+	mcopy -i venus.img bin/bootstii.bin ::BOOTSTII.BIN
 
-#dd if=bin/bootSecondStage.bin of=venus.img bs=512 seek=34 conv=notrunc
-
-echo "copiando archivos"
-mcopy -i venus.img bin/kernel.bin ::KERNEL.BIN
-mcopy -i venus.img bin/bootstii.bin ::BOOTSTII.BIN
-
-echo "Listo"
+	echo "Listo"
 
 fi
+
+######################################################
