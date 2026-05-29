@@ -21,6 +21,34 @@ start:
 	call .set_ivt
 	call .init_video
 
+	mov ah, 0x03
+	mov al, 01010000b
+	call .set_text_color
+
+	mov ah, 0x02
+	mov bx, OS_name
+	call .print_str
+
+	mov ah, 0x03
+	mov al, 00000000b
+	call .set_text_color
+
+	mov al, " "
+	mov ah, 0x01
+	call .putchar
+
+	mov ah, 0x03
+	mov al, 11000000b
+	call .set_text_color
+
+	mov ah, 0x02
+	mov bx, msg_etapa_desarrollo
+	call .print_str
+
+	mov ah, 0x03
+	mov al, 00000111b
+	call .set_text_color
+
 	sti ;<<<<<<
 	jmp .main_loop
 

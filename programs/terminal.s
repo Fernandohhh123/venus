@@ -2,31 +2,9 @@
 ; para que el usuario interactue con el sistema
 
 .start_terminal:
-	mov ah, 0x05
-	int 0x80
-
-	mov ah, 0x03
-	mov al, 01010000b
-	int 0x80
-
-	mov ah, 0x02
-	mov bx, os_name
-	int 0x80
-
-	mov ah, 0x03
-	mov al, 00000000b
-	int 0x80
-	mov ah, 0x01
-	mov al, " "
-	int 0x80
-
-	mov ah, 0x03
-	mov al, 11000111b
-	int 0x80
-
-	mov ah, 0x02
-	mov bx, ter_etapa_desarrollo
-	int 0x80
+	; limpiamos la consola
+	;mov ah, 0x05
+	;int 0x80
 
 	;color del prompt
 	mov ah, 0x03
@@ -41,6 +19,7 @@
 	mov bx, prompt
 	int 0x80
 
+	; cambiamos el color del texto
 	mov ah, 0x03
 	mov al, 00000111b
 	int 0x80
@@ -94,7 +73,7 @@ ret
 	mov bl, byte [terminal_buffer_len]
 
 	;comprobamos que el buffer este lleno
-	cmp bl, 32d
+	cmp bl, 64d
 	je .buffer_full
 
 	mov byte [command_buffer + bx], al
@@ -158,7 +137,6 @@ ret
 	.loop_parser:
 	mov al, byte [es:di]
 	cmp al, [ds:si]
-	
 
 	;comando poweroff
 
@@ -189,11 +167,10 @@ ret
 ret
 
 terminal_buffer_len db 0 ;puntero del buffer
-command_buffer db 32d dup(0) ;bytes reservados para el buffer
+command_buffer db 64d dup(0) ;bytes reservados para el buffer
 prompt db ">", 0x00
 prompt_len equ $ - prompt ;longitud del prompt
 terminal_cursor_pos dw 0x0000 ;posicion del cursor en la terminal
 terminal_endl db 0x0A, 0x0D, 0x00
-os_name db "venus", 0x00
-ter_etapa_desarrollo db "alpha-experimental", 0x00
 command_poweroff db "poweroff"
+command_clear db "clear"
