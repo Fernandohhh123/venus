@@ -4,26 +4,43 @@ se usa "int 0x80" para llamar al sistema
 
  - imprime un caracter ascii
 	- putchar
-al = 0x01
-bl = [ascii del caracter]
+ah = 0x01
+al = [ascii del caracter]
 
  - Esta funcion escribre una cadena caracteres
 	ascii hasta encontrar un 0x00
-al = 0x02
+ah = 0x02
 bx = [puntero a la cadena a imprimir] (se tomara el segmento actual)
 
  - Funcion para cmbiar el color del texto en vga
-al = 0x03
-bl = [vga color]
+ah = 0x03
+al = [vga color]
+
+- para cambiar de color es igual que en el vga oririnal a color
+0     000               0          000
+nlink back_ground_color Intensidad Text_color
+
+000b = Negro
+001b = Azul
+010b = Verde
+011b = Cian
+100b = Rojo
+101b = Magenta
+110b = Marron
+111b = Gris
 
  - Mueve el cursor a una posicion deseada, funcion gotoxy
-al = 0x04
+ah = 0x04
 bh = [X]
 bl = [Y]
 
  - limpia la consola
-al = 0x05
+ah = 0x05
+
+### Llamadas para el teclado ###
+	stdin
 
  - getchar
-  - el caracter lo guarda en el registro dl
-al = 0x06
+  - el caracter lo guarda en el registro al
+ah = 0x06
+retorno del caracter = al
