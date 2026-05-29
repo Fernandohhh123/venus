@@ -1,5 +1,5 @@
 
-sistema operativo para x86 modo real
+sistema operativo para 8086 modo real
 
 caracteristicas:
 - monotarea
@@ -10,3 +10,11 @@ caracteristicas:
 - kernel monolitico
 
 :)
+
+### Como Compilar ###
+se usa nasm para compilar este SO
+
+- El stcript build.sh debe tener permisos de ejecucion
+- El script creara una imagen llamada: venus.img
+- Esta imagen solo se ha probado en qemu-system-i386
+- Se corre como si estuviera en un floppy disk
