@@ -5,7 +5,7 @@
 ;------------------------------------------------
 
 ; Funcion para limpiar la consola
-;ah = ?
+;ah = 5
 .clear_screen:
 	push es
 	push di
@@ -50,7 +50,7 @@ ret
 
 ; Funcion para imprimir cadenas de caracteres
 ; ah = 0x02
-; bx = puntero al string, debe terminar con 0
+; bx = puntero al string, debe terminar con 0x00 la cadena
 .print_str:
 	push es
 	push di
@@ -140,7 +140,7 @@ ret
 ; Funcion para cambiar la posicion del cursor
 ; cursor_offset_screen = (y * 80) + x
 ; E:F = cursor_offset_screen
-; ax = ?
+; ah = 0x04
 ; bx = x, y = bh-x, bl-y
 .gotoxy:
 	push ax
