@@ -39,11 +39,11 @@ ret
 
 	;comprobamos backspace
 	cmp al, 0x08
-	je .call_back_space
+	je .call_backspace
 
 	;comprobamos el salto de linea
 	cmp al, 0x0A
-	je .call_process_argument
+	je .call_process_command
 
 	;metemos el caracter al buffer
 	.normal_char:
@@ -51,11 +51,11 @@ ret
 	jmp .terminal_loop
 
 
-	.call_process_argument:
-	call .process_argument
+	.call_process_command:
+	call .process_command
 	jmp .terminal_loop
 
-	.call_back_space:
+	.call_backspace:
 	call .backspace
 
 	jmp .terminal_loop
@@ -70,15 +70,17 @@ ret
 	mov es, bx
 
 	xor bx, bx
-	mov bl, byte [terminal_buffer_len]
+	mov bl, byte [terminal_buffer_offset]
 
 	;comprobamos que el buffer este lleno
-	cmp bl, 64d
-	je .buffer_full
+	cmp bl, 63d ; 63 por si se llena el buffer,
+				; de espacio para terminar la cadena
+
+	jge .buffer_full
 
 	mov byte [command_buffer + bx], al
 	inc bl
-	mov byte [terminal_buffer_len], bl
+	mov byte [terminal_buffer_offset], bl
 
 	mov ah, 0x01
 	int 0x80
@@ -94,12 +96,12 @@ ret
 	push bx
 
 	;comprobamos que haya algo en el buffer
-	mov bl, byte [terminal_buffer_len]
+	mov bl, byte [terminal_buffer_offset]
 	cmp bl, 0x00
 	je .end_backspace
 
 	dec bl
-	mov byte [terminal_buffer_len], bl
+	mov byte [terminal_buffer_offset], bl
 
 	;imprimimos el back
 	mov ah, 0x01
@@ -119,7 +121,7 @@ ret
 ret
 
 ;input
-.process_argument:
+.process_command:
 	push ax
 	push bx
 	push cx
@@ -128,27 +130,19 @@ ret
 	push ds
 	push es
 
-	mov ax, ds
-	mov es, ax
+	mov bx, terminal_buffer_offset
+	mov [command_buffer + bx], 0x00
 
-	;parser comando
-	mov si, command_poweroff
+	; strcmp
+	mov si, command_clear_screen
 	mov di, command_buffer
-	.loop_parser:
-	mov al, byte [es:di]
-	cmp al, [ds:si]
 
-	;comando poweroff
-
-	jmp .end_process_argument
-
-
-	.end_process_argument:
+	.end_process_command:
 
 	; ponemos el puntero del buffer en 0
-	mov al, byte [terminal_buffer_len]
+	mov al, byte [terminal_buffer_offset]
 	xor al, al
-	mov byte [terminal_buffer_len], al
+	mov byte [terminal_buffer_offset], al
 
 	mov ah, 0x02
 	mov bx, terminal_endl
@@ -166,11 +160,17 @@ ret
 	pop ax
 ret
 
-terminal_buffer_len db 0 ;puntero del buffer
+; Se usan los registros si y di para
+; las cadenas a comparar
+.strcmp:
+
+ret
+
+terminal_buffer_offset db 0 ;puntero del buffer
 command_buffer db 64d dup(0) ;bytes reservados para el buffer
 prompt db ">", 0x00
 prompt_len equ $ - prompt ;longitud del prompt
 terminal_cursor_pos dw 0x0000 ;posicion del cursor en la terminal
 terminal_endl db 0x0A, 0x0D, 0x00
-command_poweroff db "poweroff"
-command_clear db "clear"
+command_poweroff db "poweroff", 0x00
+command_clear_screen db "clear", 0x00
