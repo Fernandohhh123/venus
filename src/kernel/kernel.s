@@ -119,4 +119,4 @@ iret
 %include "src/kernel/ivt.s"
 %include "src/kernel/drivers/vga_driver.s"
 %include "src/kernel/drivers/keyboard_driver.s"
-%include "programs/terminal.s"
+%include "programs/shell.s"
