@@ -1,7 +1,7 @@
 
 ;------------------------------------------------
-;seccion para manejar flujo de salida de datos
-;
+;Seccion para manejar flujo de salida de datos
+;por pantalla
 ;------------------------------------------------
 
 ; Funcion para limpiar la consola
@@ -13,16 +13,14 @@
 	push bx
 	push cx
 
-	xor ax, ax
-	xor bx, bx
-	mov al, byte [screen_char_len_x]
-	mov bl, byte [screen_char_len_y]
-	mul bx
-	mov bx, 2
-	mul bx
+	; Limite de vram para el modo de
+	; vide 80x25 de VGA
+	mov ax, 0x0fff
 
 	mov bl, byte [text_color]
 
+	; Segmento de video de vram para el modo
+	; de video VGA 80x25
 	mov di, 0xb800
 	mov es, di
 	xor di, di
@@ -33,8 +31,8 @@
 	mov byte [es:di], bl
 	inc di
 	cmp di, ax
-	jge .done_clean_vram
-	jmp .loop_clean_vram
+	jle .loop_clean_vram
+	;jmp .loop_clean_vram
 	.done_clean_vram:
 
 	mov bx, 0x0000
