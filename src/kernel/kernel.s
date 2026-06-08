@@ -1,6 +1,22 @@
+; Este archivo es el principal del kernel,
+; contiene la entrada principal al kernel, el
+; loop principal, el manejo de las llamadas
+; al sistema, y se incluyen todos los archivos
+; relacionados con el kernel
+
+; Funciones que contiene este archivo:
+; kstart:
+; .main_loop:
+; .syscall_dispatcher:
+
+; #######################################
+
 bits 16
 org 0
 
+;-----------------
+; Setup de kernel
+;-----------------
     cli
     mov     ax, 0x1000
     mov     ds, ax
@@ -11,11 +27,14 @@ org 0
     mov     sp, 0xFFFF
     sti
 
-    jmp start
+    jmp kstart
 
 %include "src/kernel/data.s"
 
-start:
+;---------------------
+; Comienzo del kernel
+;---------------------
+kstart:
     cli
 
     call    .set_ivt
@@ -52,9 +71,9 @@ start:
     sti
     jmp     .main_loop
 
-;-------------------------
-;-------------------------
-
+;---------------------------
+; Loop principal del kernel
+;---------------------------
 .main_loop:
 
 	call    .start_terminal
@@ -62,9 +81,9 @@ start:
 	jmp     .main_loop
 
 
-;------------------------------------------------
+;------------------------------------------
 ; Aqui se procesan las llamadas al sistema
-;------------------------------------------------
+;------------------------------------------
 .syscall_dispatcher:
     push    bx
     push    cx
@@ -118,6 +137,9 @@ start:
     pop     bx
 iret
 
+;--------------------------------------------
+; Inclusion de todos los archivos del kernel
+;--------------------------------------------
 %include "src/kernel/stdio.s"
 %include "src/kernel/video.s"
 %include "src/kernel/ivt.s"
