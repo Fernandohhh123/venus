@@ -95,6 +95,8 @@ ret
 	push ax
 	push bx
 
+	xor bx, bx
+
 	;comprobamos que haya algo en el buffer
 	mov bl, byte [terminal_buffer_offset]
 	cmp bl, 0x00
@@ -102,6 +104,9 @@ ret
 
 	dec bl
 	mov byte [terminal_buffer_offset], bl
+
+	; Actualizamos el buffer
+	mov byte [command_buffer + bx], 0x00
 
 	;imprimimos el back
 	mov ah, 0x01
@@ -130,12 +135,52 @@ ret
 	push ds
 	push es
 
-	mov bx, terminal_buffer_offset
-	mov [command_buffer + bx], 0x00
+	; Verificamos que haya algo en el buffer
+	xor bx, bx
+	mov bl, byte [terminal_buffer_offset]
 
+	cmp bl, 0x00
+	je .end_process_command
+
+	; Si hay algo, lo terminamos con 0x00
+	mov byte [command_buffer + bx], 0x00
+
+	; Identificamos el comando
 	; strcmp
 	mov si, command_clear_screen
 	mov di, command_buffer
+	call .strcmp
+
+	cmp al, 0
+	je .call_exec_clear
+
+	mov si, command_poweroff
+	call .strcmp
+	cmp al, 0
+	je .call_exec_poweroff
+
+	jmp .command_not_found
+
+	.call_exec_clear:
+	call .fclear
+	jmp .end_process_command
+
+	.call_exec_poweroff:
+	call .fpoweroff
+	jmp .end_process_command
+
+
+	jmp .end_process_command
+
+	; ####
+	; En caso de que no exista
+	; el comando
+	.command_not_found:
+	mov ah, 0x02
+	mov bx, terminal_endl
+	int 0x80
+	mov bx, msg_command_not_found
+	int 0x80
 
 	.end_process_command:
 
@@ -160,17 +205,63 @@ ret
 	pop ax
 ret
 
+; #########
+
+; Ejecucion de comandos internos
+
+.fclear:
+	; Llamada para limpiar la consola
+	mov ah, 0x05
+	int 0x80
+ret
+
+.fpoweroff:
+	mov ax, 0x2000
+	mov dx, 0x604
+	out dx, ax
+ret
+
 ; Se usan los registros si y di para
 ; las cadenas a comparar
+; Coloca en el registro AL un 0 si las cadenas son iguales
+; y u 1 si las cadenas no son iguales
 .strcmp:
+	push bx
+	push si
+	push di
 
+	; El final de la cadena sera 0x00
+
+	.strcmp_loop:
+	mov bl, byte [es:di]
+	mov bh, byte [ds:si]
+	inc di
+	inc si
+	cmp bh, bl
+	jne .str_not_equal
+
+	cmp bh, 0
+
+	jne .strcmp_loop
+
+	mov al, 0
+	jmp .strcmp_done
+
+	.str_not_equal:
+	mov al, 1
+
+	.strcmp_done:
+
+	pop di
+	pop si
+	pop bx
 ret
 
 terminal_buffer_offset db 0 ;puntero del buffer
 command_buffer db 64d dup(0) ;bytes reservados para el buffer
 prompt db ">", 0x00
 prompt_len equ $ - prompt ;longitud del prompt
-terminal_cursor_pos dw 0x0000 ;posicion del cursor en la terminal
 terminal_endl db 0x0A, 0x0D, 0x00
 command_poweroff db "poweroff", 0x00
 command_clear_screen db "clear", 0x00
+msg_command_not_found db "Command not found", 0x00
