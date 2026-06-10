@@ -1,3 +1,15 @@
+; Este archivo contiene funciones para la entrada y salia estandar
+; de datos
+
+; El codigo de este archivo forma parte del kernel
+
+; Funciones que contiene el archivo
+; .clear_screen:
+; .print_str:
+; .putchar:
+; .gotoxy:
+; .set_text_color:
+; .getchar:
 
 ;------------------------------------------------
 ;Seccion para manejar flujo de salida de datos
@@ -7,133 +19,137 @@
 ; Funcion para limpiar la consola
 ;ah = 5
 .clear_screen:
-	push es
-	push di
-	push ax
-	push bx
-	push cx
+    push    es
+    push    di
+    push    ax
+    push    bx
+    push    cx
 
-	; Limite de vram para el modo de
-	; vide 80x25 de VGA
-	mov ax, 0x0fff
+    ; Limite de vram para el modo de
+    ; vide 80x25 de VGA
+    mov     ax, 0x0fff
 
-	mov bl, byte [text_color]
+    mov     bl, byte [text_color]
 
-	; Segmento de video de vram para el modo
-	; de video VGA 80x25
-	mov di, 0xb800
-	mov es, di
-	xor di, di
+    ; Segmento de video de vram para el modo
+    ; de video VGA 80x25
+    mov     di, 0xb800
+    mov     es, di
+    xor     di, di
 
-	.loop_clean_vram:
-	mov byte [es:di], 0x20 ;caracter espacio
-	inc di
-	mov byte [es:di], bl
-	inc di
-	cmp di, ax
-	jle .loop_clean_vram
-	;jmp .loop_clean_vram
-	.done_clean_vram:
+.loop_clean_vram:
+    mov     byte [es:di], 0x20 ;caracter espacio
+    inc     di
+    mov     byte [es:di], bl
+    inc     di
+    cmp     di, ax
+    jle     .loop_clean_vram
+    ;jmp    .loop_clean_vram
+.done_clean_vram:
 
-	mov bx, 0x0000
-	call .gotoxy
+    mov     bx, 0x0000
+    call    .gotoxy
 
-	pop cx
-	pop bx
-	pop ax
-	pop di
-	pop es
+    pop     cx
+    pop     bx
+    pop     ax
+    pop     di
+    pop     es
 ret
 
+;
 
 ; Funcion para imprimir cadenas de caracteres
 ; ah = 0x02
 ; bx = puntero al string, debe terminar con 0x00 la cadena
 .print_str:
-	push es
-	push di
-	push ax
+    push    es
+    push    di
+    push    ax
 
-	mov ax, ds
-	mov es, ax
+    mov     ax, ds
+    mov     es, ax
 
-	mov di, bx
+    mov     di, bx
 
-	; es:di
-	.loop_print:
+    ; es:di
+.loop_print:
 
-	mov al, [es:di]
-	inc di
-	or al, al
-	jz .done
-	call .putchar
-	jmp .loop_print
-	.done:
+    mov     al, [es:di]
+    inc     di
+    or      al, al
+    jz      .done
+    call    .putchar
+    jmp     .loop_print
+.done:
 
-	pop ax
-	pop di
-	pop es
+    pop     ax
+    pop     di
+    pop     es
 ret
 
+;
 
 ; Funcion para poner un caracter en la posicion actual del cursor
 ; ah = 0x01
 ; al = ascii
 .putchar:
-	push ax
-	push bx
-	push es
-	push di
+    push    ax
+    push    bx
+    push    es
+    push    di
 
-	; colocamos el color del texto
-	mov bh, byte [text_color]
+    ; colocamos el color del texto
+    mov     bh, byte [text_color]
 
-	;nos colocamos en la memoria de video
-	mov di, 0xb800
-	mov es, di
-	mov di, word [cursor_offset_memory]
+    ;nos colocamos en la memoria de video
+    mov     di, 0xb800
+    mov     es, di
+    mov     di, word [cursor_offset_memory]
 
-	;comprobamos que es un caracter especial
-	cmp al, 0x20
-	jge .put_normal_char
-	call .process_special_char
-	jmp .done_putchar
+    ;comprobamos que es un caracter especial
+    cmp     al, 0x20
+    jge     .put_normal_char
+    call    .process_special_char
+    jmp     .done_putchar
 
-	.put_normal_char:
-	mov byte [es:di], al
-	inc di
-	mov byte [es:di], bh
-	inc di
-	mov word [cursor_offset_memory], di
+.put_normal_char:
+    mov     byte [es:di], al
+    inc     di
+    mov     byte [es:di], bh
+    inc     di
+    mov     word [cursor_offset_memory], di
 
-	; actualizamos la posicion del cursor
-	mov al, byte [cursor_x]
-	mov ah, byte [screen_char_len_x]
+    ; actualizamos la posicion del cursor
+    mov     al, byte [cursor_x]
+    mov     ah, byte [screen_char_len_x]
 
-	; verificamos si esta en el final de la pantalla
-	cmp al, ah
-	je .print_new_line
+    ; Verificamos si el cursor esta
+    ; en el final de la linea
+    cmp     al, ah
+    je      .print_new_line
 
-	mov bh, byte [cursor_x]
-	inc bh
-	mov bl, byte [cursor_y]
-	call .gotoxy
-	jmp .done_update_cursor
+    mov     bh, byte [cursor_x]
+    inc     bh
+    mov     bl, byte [cursor_y]
+    call    .gotoxy
+    jmp     .done_update_cursor
 
-	.print_new_line:
-	xor bh, bh ; x = 0
-	mov bl, byte [cursor_y] ; y += 1
-	inc bl
-	call .gotoxy
-	.done_update_cursor:
-	.done_putchar:
+.print_new_line:
+    xor     bh, bh ; x = 0
+    mov     bl, byte [cursor_y] ; y += 1
+    inc     bl
+    call    .gotoxy
+.done_update_cursor:
+.done_putchar:
 
-	pop di
-	pop es
-	pop bx
-	pop ax
+    pop     di
+    pop     es
+    pop     bx
+    pop     ax
 ret
 
+;
 
 ; Funcion para cambiar la posicion del cursor
 ; cursor_offset_screen = (y * 80) + x
@@ -141,108 +157,110 @@ ret
 ; ah = 0x04
 ; bx = x, y = bh-x, bl-y
 .gotoxy:
-	push ax
-	push bx
-	push dx
+    push    ax
+    push    bx
+    push    dx
 
-	; bh = x
-	; bl = y
-	mov byte [cursor_x], bh
-	mov byte [cursor_y], bl
+    ; bh = x
+    ; bl = y
+    mov     byte [cursor_x], bh
+    mov     byte [cursor_y], bl
 
-	xor ax, ax
-	mov al, byte [cursor_y]
-	mov bx, 80
-	mul bx
-	xor bx, bx
-	mov bl, byte [cursor_x]
-	add ax, bx
-	mov word [cursor_offset_screen], ax
+    xor     ax, ax
+    mov     al, byte [cursor_y]
+    mov     bx, 80
+    mul     bx
+    xor     bx, bx
+    mov     bl, byte [cursor_x]
+    add     ax, bx
+    mov     word [cursor_offset_screen], ax
 
 
-	; E:F = cursor_offset
-	mov bx, word [cursor_offset_screen]
-	call .vga_gotoxy
+    ; E:F = cursor_offset
+    mov     bx, word [cursor_offset_screen]
+    call    .vga_gotoxy
 
-	;actualizamos el puntero de la memoria
-	mov ax, word [cursor_offset_screen]
-	mov bx, 2
-	mul bx
-	mov word [cursor_offset_memory], ax
+    ;actualizamos el puntero de la memoria
+    mov     ax, word [cursor_offset_screen]
+    mov     bx, 2
+    mul     bx
+    mov     word [cursor_offset_memory], ax
 
-	pop dx
-	pop bx
-	pop ax
+    pop     dx
+    pop     bx
+    pop     ax
 ret
 
 ; funcion para manejar caracteres no imprimibles/especiales
 .process_special_char:
-	push es
-	push di
-	push ax
-	push bx
+    push    es
+    push    di
+    push    ax
+    push    bx
 
-	cmp al, 0x08 ;backspace
-	je .print_backspace
-	cmp al, 0x0A ;endl
-	je .print_endl
-	cmp al, 0x0D ;retorno de carro
-	je .print_ret_carro
+    cmp     al, 0x08 ;backspace
+    je      .print_backspace
+    cmp     al, 0x0A ;endl
+    je      .print_endl
+    cmp     al, 0x0D ;retorno de carro
+    je      .print_ret_carro
 
-	.print_endl:
-	mov bl, byte [cursor_y]
-	inc bl
-	mov bh, byte [cursor_x]
-	call .gotoxy
-	jmp .done_special_char
+.print_endl:
+    mov     bl, byte [cursor_y]
+    inc     bl
+    mov     bh, byte [cursor_x]
+    call    .gotoxy
+    jmp     .done_special_char
 
-	.print_ret_carro:
-	xor bh, bh
-	mov bl, [cursor_y]
-	call .gotoxy
-	jmp .done_special_char
+.print_ret_carro:
+    xor     bh, bh
+    mov     bl, [cursor_y]
+    call    .gotoxy
+    jmp     .done_special_char
 
 
-	.print_backspace:
-	;verificamos que el cursor este en 0, 0
-	mov bh, byte [cursor_x]
-	mov bl, byte [cursor_y]
-	mov al, bl
-	or al, bh
-	jz .done_special_char
+.print_backspace:
+    ;verificamos que el cursor este en 0, 0
+    mov     bh, byte [cursor_x]
+    mov     bl, byte [cursor_y]
+    mov     al, bl
+    or      al, bh
+    jz      .done_special_char
 
-	;verificamos que el cursor este al principio x = 0
-	cmp bh, 0
-	je .ret_car_y
+    ;verificamos que el cursor este al principio x = 0
+    cmp     bh, 0
+    je      .ret_car_y
 
-	dec bh
-	call .gotoxy
-	mov byte [cursor_x], bh
-	mov byte [cursor_y], bl
+    dec     bh
+    call    .gotoxy
+    mov     byte [cursor_x], bh
+    mov     byte [cursor_y], bl
 
-	jmp .done_special_char
-	;si el cursorX esta en 0,y regresamos en 1y
-	.ret_car_y:
-	mov bl, byte [cursor_y]
-	dec bl
-	mov bh, byte [screen_char_len_x]
-	call .gotoxy
+    jmp     .done_special_char
+    ;si el cursorX esta en 0,y regresamos en 1y
+.ret_car_y:
+    mov     bl, byte [cursor_y]
+    dec     bl
+    mov     bh, byte [screen_char_len_x]
+    call    .gotoxy
 
-	jmp .done_special_char
+    jmp     .done_special_char
 
-	.done_special_char:
+.done_special_char:
 
-	pop bx
-	pop ax
-	pop di
-	pop es
+    pop     bx
+    pop     ax
+    pop     di
+    pop     es
 ret
+
+;
 
 ; Funcion para cambiar el color del texto vga
 ; ah = 0x03
 ; al color
 .set_text_color:
-    mov byte [text_color], al
+    mov     byte [text_color], al
 ret
 
 ;------------------------------------------------
