@@ -47,6 +47,7 @@ kb_buffer_head db 0
 kb_buffer_tail db 0
 
 
+; Esto es el mapeo de memoria de los scancodes del teclado a codigo ascii
 ascii_table:
 	db '0'
 	db 'E' ;esc

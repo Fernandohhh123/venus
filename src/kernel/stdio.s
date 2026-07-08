@@ -44,7 +44,7 @@
     inc     di
     cmp     di, ax
     jle     .loop_clean_vram
-    ;jmp    .loop_clean_vram
+
 .done_clean_vram:
 
     mov     bx, 0x0000
