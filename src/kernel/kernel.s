@@ -95,14 +95,21 @@ kstart:
 
     cmp     ah, 0x01
     je      .sys_putchar
+
     cmp     ah, 0x02
     je      .sys_print_str
+
     cmp     ah, 0x03
     je      .sys_set_text_color
+
     cmp     ah, 0x05
     je      .sys_clear_screen
+
     cmp     ah, 0x06
     je      .sys_getchar
+
+    cmp     ah, 0x07
+    je     .sys_poweroff
 
     jmp     .done_syscall_dispatcher
 
@@ -122,8 +129,12 @@ kstart:
     call    .clear_screen
     jmp     .done_syscall_dispatcher
 
-    .sys_getchar:
+.sys_getchar:
     call    .getchar
+    jmp     .done_syscall_dispatcher
+
+.sys_poweroff:
+    call    .poweroff
     jmp     .done_syscall_dispatcher
 
 .done_syscall_dispatcher:
@@ -145,4 +156,6 @@ iret
 %include "src/kernel/ivt.s"
 %include "src/kernel/drivers/vga_driver.s"
 %include "src/kernel/drivers/keyboard_driver.s"
+%include "src/kernel/drivers/power.s"
+
 %include "programs/shell.s"
