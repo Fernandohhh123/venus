@@ -224,9 +224,8 @@ ret
 ret
 
 .fpoweroff:
-    mov     ax, 0x2000
-    mov     dx, 0x604
-    out     dx, ax
+    mov     ah, 0x07
+    int     0x80
 ret
 
 .fhelp:
