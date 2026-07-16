@@ -44,3 +44,7 @@ ah = 0x05
   - el caracter lo guarda en el registro al
 ah = 0x06
 retorno del caracter = al
+
+
+### apagar el sistema ###
+ah = 0x07
