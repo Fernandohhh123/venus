@@ -45,6 +45,18 @@ ah = 0x05
 ah = 0x06
 retorno del caracter = al
 
-
-### apagar el sistema ###
+### Gestion de energia ###
+- apagar el sistema
 ah = 0x07
+
+- Reiniciar el sistema
+ah = 0x08 [ ! ]
+
+- Suspender el sistema
+ah = 0x09 [ ! ]
+
+### Funciones de disco ###
+- leer la primera enrada de un directorio
+ah = 0x0A
+
+- leer la siguente entrada del directorio actual
