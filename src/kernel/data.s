@@ -42,7 +42,7 @@ cursor_y db 0 ; posicion Y del cursor en el monitor
 
 ;--------------------------------------------------------
 ;Datos para el buffer de teclado keyboard_handler
-kb_buffer db 16 dup(0) ;reservamos 16 bytes iniciados en 0
+kb_buffer db 32 dup(0) ;reservamos 16 bytes iniciados en 0
 kb_buffer_head db 0
 kb_buffer_tail db 0
 
