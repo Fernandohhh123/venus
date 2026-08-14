@@ -284,8 +284,7 @@ ret
 	xor bx, bx
 	;verificamos que hay algo en el buffer
 	;si no hay nada, esperamos
-	;si hay algo devolvemos el valor del buffer en dl
-	;head++ && 0x0F
+	;si hay algo devolvemos el valor del buffer en al
 
 	.wait_loop:
 
@@ -303,29 +302,12 @@ ret
 	cli
 	mov al, byte [kb_buffer + bx]
 	inc bl
-	and bl, 0x0F
+	and bl, 0x1F
 	mov byte [kb_buffer_tail], bl
 	sti
 
 	test al, 0x80
 	jnz .wait_loop
-
-	; al lo convertimos a ascii
-	; el codigo ascii se retorna en al
-	call .scancode_to_ascii
-
-	pop bx
-ret
-
-;convertimos el scancode a ascii
-; al = scancode
-; return al = ascii
-.scancode_to_ascii:
-	push bx
-
-	xor bh, bh
-	mov bl, al
-	mov al, byte [ascii_table + bx]
 
 	pop bx
 ret
