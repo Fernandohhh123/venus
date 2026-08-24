@@ -25,9 +25,10 @@
     int     0x80
 
 	jmp     .terminal_loop
-ret
 
-;################################
+; ################################
+; Main loop del programa
+; ################################
 .terminal_loop:
 
     ;getchar
@@ -59,8 +60,11 @@ ret
     call    .backspace
 
     jmp     .terminal_loop
-;###############################
 
+
+;#################################
+; Agregando el caracter al buffer
+;#################################
 ;el char esta en AL
 .add_char_to_buffer:
     push    bx
@@ -91,6 +95,9 @@ ret
     pop     bx
 ret
 
+; ########################
+; Procesamos el backspace
+; ########################
 .backspace:
     push    ax
     push    bx
@@ -126,6 +133,9 @@ ret
 ret
 
 ;input
+; #####################################
+; Identificacion de los comandos
+; #####################################
 .process_command:
     push    ax
     push    bx
@@ -164,8 +174,19 @@ ret
     cmp     al, 0
     je     .call_exec_help
 
+    mov     si, command_ls
+    call    .strcmp
+    cmp     al, 0
+    je      .call_exec_ls
+
+    mov     si, command_exit
+    call    .strcmp
+    cmp     al, 0
+    je      .call_exec_exit
+
     jmp     .command_not_found
 
+; salto a las rutinas para cada comando interno
 .call_exec_clear:
     call    .fclear
     jmp     .end_process_command
@@ -176,6 +197,14 @@ ret
 
 .call_exec_help:
     call    .fhelp
+    jmp     .end_process_command
+
+.call_exec_ls:
+    call    .fls
+    jmp     .end_process_command
+
+.call_exec_exit:
+    call    .fexit
     jmp     .end_process_command
 
     jmp     .end_process_command
@@ -190,6 +219,9 @@ ret
     mov     bx, msg_command_not_found
     int     0x80
 
+;---------------------------------------------
+; Rutina para terminar de procesar el comando
+;---------------------------------------------
 .end_process_command:
 
     ; ponemos el puntero del buffer en 0
@@ -213,9 +245,11 @@ ret
     pop     ax
 ret
 
-; #########
+;
 
+; ###########################################
 ; Ejecucion de comandos internos
+; ###########################################
 
 .fclear:
     ; Llamada para limpiar la consola
@@ -234,6 +268,25 @@ ret
     int     0x80
 ret
 
+.fls:
+    mov     ah, 0x01
+    mov     al, "A"
+    int     0x80
+ret
+
+.fexit:
+    mov     ah, 0x02
+    mov     bx, msg_bye
+    int     0x80
+
+    mov     ah, 0x10
+    int     0x80
+
+; ------------------
+
+; ####################################
+; Funcion para comparar cadenas de bytes
+; ####################################
 ; Se usan los registros si y di para
 ; las cadenas a comparar
 ; Coloca en el registro AL un 0 si las cadenas son iguales
@@ -270,6 +323,10 @@ ret
     pop     bx
 ret
 
+; #####################################
+; Datos del programa
+; #####################################
+
 terminal_buffer_offset db 0 ;puntero del buffer
 command_buffer db 64d dup(0) ;bytes reservados para el buffer
 prompt db ">", 0x00
@@ -279,10 +336,15 @@ terminal_endl db 0x0A, 0x0D, 0x00
 command_poweroff db "poweroff", 0x00
 command_clear_screen db "clear", 0x00
 command_help db "help", 0x00
+command_ls db "ls", 0x00
+command_exit db "exit", 0x00
 
 msg_command_not_found db "Command not found", 0x00
 msg_help db 0x0A, 0x0D, "Terminal integrada", 0x0A, 0x0D
          db "Comandos internos:", 0xa, 0xd
          db "clear - Limpiar la pantalla",0xa, 0xd
          db "help - Muestra esta ayuda", 0xa, 0xd
-         db "poweroff - Apaga el sistema",0xa, 0xd, 0x00
+         db "poweroff - Apaga el sistema",0xa, 0xd,
+         db "exit - salir del programa", 0xa, 0xd, 0
+
+msg_bye db 0x0a, 0x0d, "bye", 0xa, 0xd

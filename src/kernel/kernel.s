@@ -111,6 +111,9 @@ kstart:
     cmp     ah, 0x07
     je     .sys_poweroff
 
+    cmp     ah, 0x10
+    je      .sys_end_program
+
     jmp     .done_syscall_dispatcher
 
 .sys_putchar:
@@ -137,6 +140,10 @@ kstart:
     call    .poweroff
     jmp     .done_syscall_dispatcher
 
+.sys_end_program:
+    call    .end_program
+    jmp     .done_syscall_dispatcher
+
 .done_syscall_dispatcher:
 
     pop     di
@@ -146,7 +153,13 @@ kstart:
     pop     dx
     pop     cx
     pop     bx
+
 iret
+
+.end_program:
+    jmp     .main_loop
+
+
 
 ;--------------------------------------------
 ; Inclusion de todos los archivos del kernel

@@ -60,3 +60,8 @@ ah = 0x09 [ ! ]
 ah = 0x0A
 
 - leer la siguente entrada del directorio actual
+
+### Cerrar el programa ###
+
+ah = 0x10
+- Termina la ejecucion del programa
