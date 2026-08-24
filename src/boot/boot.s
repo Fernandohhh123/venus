@@ -14,11 +14,11 @@ OEMName db "VENUS   "
 BytesPerSector dw 512
 SectorsPerCluster db 1
 ReservedSectorsCounter dw 1
-FATcount db 2
+FATcount db 2 ;tablas fat
 DirEntires dw 224
-TotalSectors dw 2880 ;total sectores en un floppy, 1.44 mb
-MediaDescriptor db 0xF0
-SectorsPerFat dw 9
+TotalSectors dw 2880 ;total sectores en un floppy 3.5, 1.44 mb
+MediaDescriptor db 0xF0 ;describe que tipo de disco es, floppy de 3.5 pulgadas
+SectorsPerFat dw 9 ;cantidad de sectores que ocupa cada tabla fat
 SectorsPerTrack dw 18
 HeadCounts dw 2
 HiddenSectors dd 0
@@ -36,7 +36,7 @@ FSType db "FAT12   " ;debe medir 8 bytes
 
 ;inicio de root
 ;RootDirStart = ReservedSectorsCounter + (FATcount * SectorsPerFat)
-RootDirStart db 19
+RootDirStart db 19 ;root se encuentra en el sector 19
 
 ;inicio del area de datos o cuantos sectores ocupa root
 ;RootDirSectors = ((DirEntires * 32) + BytesPerSector - 1) / BytesPerSector
@@ -81,7 +81,7 @@ _start:
 	mov ch, 0
 	mov cl, 2
 	mov dh, 0
-	mov dl, [DriveNumber]
+	mov dl, byte [DriveNumber]
 	xor bx, bx
 	mov es, bx
 	mov bx, 0x7E00
