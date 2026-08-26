@@ -18,7 +18,7 @@
 
 ; Funcion para limpiar la consola
 ;ah = 5
-.clear_screen:
+clear_screen:
     push    es
     push    di
     push    ax
@@ -48,7 +48,7 @@
 .done_clean_vram:
 
     mov     bx, 0x0000
-    call    .gotoxy
+    call    gotoxy
 
     pop     cx
     pop     bx
@@ -62,7 +62,7 @@ ret
 ; Funcion para imprimir cadenas de caracteres
 ; ah = 0x02
 ; bx = puntero al string, debe terminar con 0x00 la cadena
-.print_str:
+print_str:
     push    es
     push    di
     push    ax
@@ -78,10 +78,10 @@ ret
     mov     al, [es:di]
     inc     di
     or      al, al
-    jz      .done
-    call    .putchar
+    jz      .done_print_str
+    call    putchar
     jmp     .loop_print
-.done:
+.done_print_str:
 
     pop     ax
     pop     di
@@ -93,7 +93,7 @@ ret
 ; Funcion para poner un caracter en la posicion actual del cursor
 ; ah = 0x01
 ; al = ascii
-.putchar:
+putchar:
     push    ax
     push    bx
     push    es
@@ -110,7 +110,7 @@ ret
     ;comprobamos que es un caracter especial
     cmp     al, 0x20
     jge     .put_normal_char
-    call    .process_special_char
+    call    process_special_char
     jmp     .done_putchar
 
 .put_normal_char:
@@ -132,14 +132,14 @@ ret
     mov     bh, byte [cursor_x]
     inc     bh
     mov     bl, byte [cursor_y]
-    call    .gotoxy
+    call    gotoxy
     jmp     .done_update_cursor
 
 .print_new_line:
     xor     bh, bh ; x = 0
     mov     bl, byte [cursor_y] ; y += 1
     inc     bl
-    call    .gotoxy
+    call    gotoxy
 .done_update_cursor:
 .done_putchar:
 
@@ -156,7 +156,7 @@ ret
 ; E:F = cursor_offset_screen
 ; ah = 0x04
 ; bx = x, y = bh-x, bl-y
-.gotoxy:
+gotoxy:
     push    ax
     push    bx
     push    dx
@@ -178,7 +178,7 @@ ret
 
     ; E:F = cursor_offset
     mov     bx, word [cursor_offset_screen]
-    call    .vga_gotoxy
+    call    vga_gotoxy
 
     ;actualizamos el puntero de la memoria
     mov     ax, word [cursor_offset_screen]
@@ -192,61 +192,61 @@ ret
 ret
 
 ; funcion para manejar caracteres no imprimibles/especiales
-.process_special_char:
+process_special_char:
     push    es
     push    di
     push    ax
     push    bx
 
     cmp     al, 0x08 ;backspace
-    je      .print_backspace
+    je      print_backspace
     cmp     al, 0x0A ;endl
-    je      .print_endl
+    je      print_endl
     cmp     al, 0x0D ;retorno de carro
-    je      .print_ret_carro
+    je      print_ret_carro
 
-.print_endl:
+print_endl:
     mov     bl, byte [cursor_y]
     inc     bl
     mov     bh, byte [cursor_x]
-    call    .gotoxy
-    jmp     .done_special_char
+    call    gotoxy
+    jmp     done_process_special_char
 
-.print_ret_carro:
+print_ret_carro:
     xor     bh, bh
     mov     bl, [cursor_y]
-    call    .gotoxy
-    jmp     .done_special_char
+    call    gotoxy
+    jmp     done_process_special_char
 
 
-.print_backspace:
+print_backspace:
     ;verificamos que el cursor este en 0, 0
     mov     bh, byte [cursor_x]
     mov     bl, byte [cursor_y]
     mov     al, bl
     or      al, bh
-    jz      .done_special_char
+    jz      done_process_special_char
 
     ;verificamos que el cursor este al principio x = 0
     cmp     bh, 0
-    je      .ret_car_y
+    je      ret_car_y
 
     dec     bh
-    call    .gotoxy
+    call    gotoxy
     mov     byte [cursor_x], bh
     mov     byte [cursor_y], bl
 
-    jmp     .done_special_char
+    jmp     done_process_special_char
     ;si el cursorX esta en 0,y regresamos en 1y
-.ret_car_y:
+ret_car_y:
     mov     bl, byte [cursor_y]
     dec     bl
     mov     bh, byte [screen_char_len_x]
-    call    .gotoxy
+    call    gotoxy
 
-    jmp     .done_special_char
+    jmp     done_process_special_char
 
-.done_special_char:
+done_process_special_char:
 
     pop     bx
     pop     ax
@@ -259,7 +259,7 @@ ret
 ; Funcion para cambiar el color del texto vga
 ; ah = 0x03
 ; al color
-.set_text_color:
+set_text_color:
     mov     byte [text_color], al
 ret
 
@@ -277,7 +277,7 @@ ret
 ; ah = 0x06
 ; Retorna en el registro
 ;  al = codigo ascii de la tecla presionada
-.getchar:
+getchar:
 	push bx
 
 	xor ax, ax

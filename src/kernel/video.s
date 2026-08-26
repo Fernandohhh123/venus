@@ -3,7 +3,7 @@
 ; manejar el sistema
 ;------------------------------------------------
 
-.init_video:
+init_video:
 	push es
 	push di
 	push ax
@@ -21,10 +21,10 @@
 	mov word [cursor_offset_memory], 0x0000
 
 	; limpiamos la pantalla
-	call .clear_screen
+	call clear_screen
 
 	mov bx, 0x0000
-	call .gotoxy
+	call gotoxy
 
 	pop bx
 	pop ax

@@ -8,6 +8,26 @@ msg_etapa_desarrollo db "alpha-experimental", 0x0a, 0xd, 0
 msgEnterMainLoop db "Enter to main loop", 0x0A, 0x0D, 0
 
 ;--------------------------------------------------------
+; Direcciones a las funciones al hacer una syscall
+syscall_vt:
+    dw      0x0000          ; 0x00
+    dw      putchar         ; 0x01
+    dw      print_str       ; 0x02
+    dw      set_text_color  ; 0x03
+    dw      0x0000          ; 0x04
+    dw      clear_screen    ; 0x05
+    dw      getchar         ; 0x06
+    dw      poweroff        ; 0x07
+    dw      0x0000          ; 0x08
+    dw      0x0000          ; 0x09
+    dw      0x0000          ; 0x0a
+    dw      0x0000          ; 0x0b
+    dw      0x0000          ; 0x0c
+    dw      0x0000          ; 0x0d
+    dw      0x0000          ; 0x0e
+    dw      0x0000          ; 0x0f
+    dw      end_program     ; 0x10
+
 
 ;--------------------------------------------------------
 ; datos usados para gestionar el video del sistema

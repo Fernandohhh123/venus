@@ -2,7 +2,7 @@
 ; el chip de video vga
 
 ;bx = cursor offset screen
-.vga_gotoxy:
+vga_gotoxy:
 	push ax
 	push bx
 	push dx

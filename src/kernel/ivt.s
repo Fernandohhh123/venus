@@ -9,7 +9,7 @@
 ; putchar
 ;
 
-.set_ivt:
+set_ivt:
 	push es
 	push ax
 
@@ -17,7 +17,7 @@
 	; Interrupcion para el usuario
 	xor ax, ax
 	mov es, ax
-	mov word [es:0x80*4], .syscall_dispatcher
+	mov word [es:0x80*4], syscall_dispatcher
 	mov word [es:0x80*4+2], cs
 	;----------------------------------
 
@@ -26,7 +26,7 @@
 	; keyboard handler
 	xor ax, ax
 	mov es, ax
-	mov word [es:0x09*4], .keyboard_handler
+	mov word [es:0x09*4], keyboard_handler
 	mov word [es:0x09*4+2], cs
 	;----------------------------------
 

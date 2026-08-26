@@ -4,7 +4,7 @@
 
 
 ; funcion para procesar el teclado
-.keyboard_handler:
+keyboard_handler:
     push ax
 	push bx
 	push cx
