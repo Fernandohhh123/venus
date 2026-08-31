@@ -1,10 +1,19 @@
 ;Este archivo contiene el programa de terminal
 ; para que el usuario interactue con el sistema
 
-.start_terminal:
+; Comandos:
+; clear, poweroff, help, exit, ls
+
+start_terminal:
     ; limpiamos la consola
     ;mov ah, 0x05
     ;int 0x80
+
+    call    .clear_command_buffer
+
+    mov     ah, 0x02
+    mov     bx, msg_welcome
+    int     0x80
 
     ;color del prompt
     mov     ah, 0x03
@@ -25,6 +34,22 @@
     int     0x80
 
 	jmp     .terminal_loop
+
+;--------------------------
+
+.clear_command_buffer:
+    push    ax
+    push    bx
+    push    cx
+
+    mov     byte [terminal_buffer_offset], 0x00
+
+    pop     cx
+    pop     bx
+    pop     ax
+ret
+
+;----------------------
 
 ; ################################
 ; Main loop del programa
@@ -333,6 +358,8 @@ prompt db ">", 0x00
 prompt_len equ $ - prompt ;longitud del prompt
 terminal_endl db 0x0A, 0x0D, 0x00
 
+msg_welcome db "Terminal Integrada", 0x0A, 0x0D, 0x00
+
 command_poweroff db "poweroff", 0x00
 command_clear_screen db "clear", 0x00
 command_help db "help", 0x00
@@ -347,4 +374,4 @@ msg_help db 0x0A, 0x0D, "Terminal integrada", 0x0A, 0x0D
          db "poweroff - Apaga el sistema",0xa, 0xd,
          db "exit - salir del programa", 0xa, 0xd, 0
 
-msg_bye db 0x0a, 0x0d, "bye", 0xa, 0xd
+msg_bye db 0x0a, 0x0d, "bye", 0xa, 0xd, 0x00
