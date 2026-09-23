@@ -35,9 +35,9 @@ keyboard_handler:
 	mov al, 0x20 ;00100000b
 	out 0x20, al
 
-    pop ax
-	pop cx
+    pop cx
 	pop bx
+	pop ax
 iret
 
 .scancode_to_ascii:
