@@ -74,9 +74,9 @@ ascii_table:
 	db '1', '2', '3', '4' ,'5', '6', '7', '8', '9', '0'
 	db '-', '='
 	db 0x08 ; backspace
-	db 'T' ; tab
+	db "T" ; tab
 	db 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']'
-	db 0x0A ; enter
+	db 0x0A ; enter/endl
 	db 'C' ; ctl
 	db 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', "'"
 	db "`"
@@ -106,21 +106,25 @@ ascii_table:
 	db '?' ;-----------
 
 	db '0' ; home
+
+	;-------------------
 	db '0' ; flechita arriba
+	;-------------------
+
 	db 'P' ; PgUp
 
 	db '?' ;------------
-
 	db '0' ; flechita izquierda
-
 	db '?' ;------------
-
 	db '0' ; flechita derecha
-
 	db '?' ;-----------
 
 	db '0' ; end
+
+	;-------------------
 	db '0' ; flechita abajo
+	;------------------
+
 	db '0' ; PgDn
 	db '0' ; insert
 
@@ -132,7 +136,7 @@ ascii_table:
 	db '0' ; F12
 	db '4'
 	db '5'
-	db '0' ;super / mod / win
+	db '0' ;super / mod
 	db '7'
 	db '8'
 	db '9'
