@@ -47,7 +47,7 @@ clear_screen:
 
 .done_clean_vram:
 
-    mov     bx, 0x0000
+    xor		bx, bx
     call    gotoxy
 
     pop     cx
@@ -111,6 +111,49 @@ putchar:
     cmp     al, 0x20
     jge     .put_normal_char
     call    process_special_char
+
+	; Scroll vertical en caso de sobrepasar las 25 filas
+	; Verificamos que cursor_y no sea mayor a 24
+	mov		al, byte [cursor_y]
+	cmp		al, 24 ; cantidad de caracteres en el eje Y
+	jle		.done_putchar
+
+	push	ax
+	push	cx
+	push	di
+	push	si
+	push	es
+	push	ds
+
+	mov		al, 24
+	mov		byte [cursor_y], al
+
+	mov		cx, 3840
+	mov 	ax, 0xb800
+	mov		es, ax
+	mov		ds, ax
+	mov		si, 160
+	xor		di, di
+
+	cld		; incrementar si y di
+
+	rep		movsb
+
+	mov		cx, 160
+	mov		ax, 0x0720
+	mov		di, 3840
+	rep		stosw
+
+	xor		bx, bx
+	call	gotoxy
+
+	pop		ds
+	pop		es
+	pop		si
+	pop		di
+	pop		cx
+	pop		ax
+
     jmp     .done_putchar
 
 .put_normal_char:
@@ -133,16 +176,14 @@ putchar:
     inc     bh
     mov     bl, byte [cursor_y]
     call    gotoxy
-    jmp     .done_update_cursor
+    jmp     .done_putchar
 
 .print_new_line:
     xor     bh, bh ; x = 0
     mov     bl, byte [cursor_y] ; y += 1
     inc     bl
     call    gotoxy
-.done_update_cursor:
 .done_putchar:
-
     pop     di
     pop     es
     pop     bx
