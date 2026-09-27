@@ -22,7 +22,7 @@ org 0
     mov     ds, ax
     mov     ax, 0x1000
     mov     es, ax
-    mov     ax, 0x3000
+    mov     ax, 0x2000
     mov     ss, ax
     mov     sp, 0xFFFF
     sti
@@ -75,7 +75,12 @@ kstart:
 ; Loop principal del kernel
 ;---------------------------
 main_loop:
+	; buscamos el archivo para saber que ejecutar
 
+	; buscamos el programa que esta en el archivo
+
+	; antes de llamar al programa, guardamos la pila
+	mov		word [kernel_sp], sp
 	call    start_terminal
 
 	jmp     main_loop
@@ -109,8 +114,9 @@ syscall_dispatcher:
     iret
 
 end_program:
+	; restauramos la pila del kernel
+	mov		sp, word [kernel_sp]
     jmp     main_loop
-
 
 ;--------------------------------------------
 ; Inclusion de todos los archivos del kernel
