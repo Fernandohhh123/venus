@@ -7,6 +7,9 @@ char_endl db 0x0A, 0x0D, 0
 msg_etapa_desarrollo db "alpha-experimental", 0x0a, 0xd, 0
 msgEnterMainLoop db "Enter to main loop", 0x0A, 0x0D, 0
 
+; Valor de la pila del kernel antes de saltar a un programa de usuario
+kernel_sp dw 0x00
+
 ;--------------------------------------------------------
 ; Direcciones a las funciones al hacer una syscall
 syscall_vt:
