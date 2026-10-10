@@ -1,5 +1,5 @@
 ;--------------------------------------------------------
-; datos para el sistema
+; datos del kernel
 ;system info
 OS_name db "venus", 0
 OS_version db "0.1", 0
@@ -7,8 +7,13 @@ char_endl db 0x0A, 0x0D, 0
 msg_etapa_desarrollo db "alpha-experimental", 0x0a, 0xd, 0
 msgEnterMainLoop db "Enter to main loop", 0x0A, 0x0D, 0
 
+
+;Datos para el kernel
 ; Valor de la pila del kernel antes de saltar a un programa de usuario
 kernel_sp dw 0x00
+
+; Buffer para cargar datos del disco
+kdisk_buffer db 512
 
 ;--------------------------------------------------------
 ; Direcciones a las funciones al hacer una syscall
