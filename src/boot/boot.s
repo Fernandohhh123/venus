@@ -63,7 +63,7 @@ file_name db "BOOTSTIIBIN"
 
 _start:
 	cli
-    mov ax, 0x07C0
+	mov ax, 0x07C0
     mov ds, ax
     mov es, ax
     mov ax, 0x0000
