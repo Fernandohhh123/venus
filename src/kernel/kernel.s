@@ -68,6 +68,10 @@ kstart:
     mov     al, 00000111b
     call    set_text_color
 
+	;  Asignamos sp al usuario
+	mov	ax, 0x3000
+	mov	word [user_sp], ax
+
     sti
     jmp     main_loop
 
@@ -75,13 +79,16 @@ kstart:
 ; Loop principal del kernel
 ;---------------------------
 main_loop:
-	; buscamos el archivo para saber que ejecutar
+	; buscamos el archivo init.bin para saber que ejecutar
 
 	; buscamos el programa que esta en el archivo
 
+	; nos preparamos para ejecutar el programa
+
 	; antes de llamar al programa, guardamos la pila
 	mov		word [kernel_sp], sp
-	call    start_terminal
+	call			start_terminal
+	mov		sp, word [kernel_sp]
 
 	jmp     main_loop
 
@@ -90,6 +97,9 @@ main_loop:
 ; Aqui se procesan las llamadas al sistema
 ;------------------------------------------
 syscall_dispatcher:
+
+	; guardamos la pila del usuario y usamos la pila del kernel
+
     push    bx
     push    cx
     push    dx
@@ -111,6 +121,8 @@ syscall_dispatcher:
     pop     cx
     pop     bx
 
+	; restauramos la pila del usuario y guardamos la pila del kernel
+
     iret
 
 end_program:
@@ -127,5 +139,8 @@ end_program:
 %include "src/kernel/drivers/vga_driver.s"
 %include "src/kernel/drivers/keyboard_driver.s"
 %include "src/kernel/drivers/power.s"
+%include "src/kernel/disk.s"
+%include "src/kernel/drivers/floppy_disk_driver.s"
+%include "src/kernel/file_system/fat12.s"
 
 %include "programs/shell.s"
