@@ -7,13 +7,17 @@ char_endl db 0x0A, 0x0D, 0
 msg_etapa_desarrollo db "alpha-experimental", 0x0a, 0xd, 0
 msgEnterMainLoop db "Enter to main loop", 0x0A, 0x0D, 0
 
+; ---
 
 ;Datos para el kernel
 ; Valor de la pila del kernel antes de saltar a un programa de usuario
-kernel_sp dw 0x00
+kernel_sp dw 0x0000
+
+; Pila de usuario para gardarla al hacer una llamada al sistema
+user_sp dw 0x0000
 
 ; Buffer para cargar datos del disco
-kdisk_buffer db 512
+k_disk_buffer times 512 db 0
 
 ;--------------------------------------------------------
 ; Direcciones a las funciones al hacer una syscall
